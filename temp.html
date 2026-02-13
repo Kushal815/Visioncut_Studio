@@ -1,0 +1,2166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionCut Studio - Premium Video Editing</title>
+    <link rel="icon" type="image/x-icon" href="/Assets/images/title logo.png">
+    <script>
+        (function() {
+            // Always set dark mode
+            document.documentElement.classList.add('dark-mode');
+        })();
+    </script>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    
+    :root {
+        /* Dark Theme Only */
+        --bg-primary: #000000;
+        --bg-secondary: #0a0a0a;
+        --text-primary: #ffffff;
+        --text-secondary: #999999;
+        --accent: #ffffff;
+        --accent-light: #cccccc;
+        --border: rgba(255, 255, 255, 0.1);
+        --shadow: rgba(255, 255, 255, 0.05);
+        --card-bg: #0f0f0f;
+        --gradient-1: rgba(20, 20, 20, 0.8);
+        --gradient-2: rgba(10, 10, 10, 0.6);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html {
+        scroll-behavior: smooth;
+        overflow-x: hidden;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        overflow-x: hidden;
+        transition: background 0.3s ease, color 0.3s ease;
+        padding-top: 80px; /* Add space for fixed header */
+    }
+
+    /* Interactive Background */
+    #canvas-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .content-wrapper {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Cursor Follower */
+    .cursor {
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--accent);
+        border-radius: 50%;
+        position: fixed;
+        pointer-events: none;
+        z-index: 9999;
+        transition: all 0.1s ease;
+        transform: translate(-50%, -50%);
+        mix-blend-mode: difference;
+    }
+
+    .cursor-dot {
+        width: 6px;
+        height: 6px;
+        background: var(--accent);
+        border-radius: 50%;
+        position: fixed;
+        pointer-events: none;
+        z-index: 9999;
+        transition: all 0.05s ease;
+        transform: translate(-50%, -50%);
+        mix-blend-mode: difference;
+    }
+
+    /* Navigation */
+    nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 30px 60px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 1000;
+        transition: all 0.3s ease;
+    }
+
+    nav.scrolled {
+        padding: 20px 60px;
+        background: var(--gradient-1);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: -1px;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .nav-logo-img {
+        width: 45px;
+        height: 45px;
+        object-fit: cover;
+        border-radius: 50%;
+        transition: transform 0.3s ease;
+    }
+
+    .nav-logo:hover .nav-logo-img {
+        transform: rotate(360deg);
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 50px;
+        align-items: center;
+    }
+
+    .nav-links a {
+        color: var(--text-primary);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        position: relative;
+        transition: color 0.3s ease;
+    }
+
+    .nav-links a::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 0;
+        height: 1px;
+        background: var(--accent);
+        transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover::after {
+        width: 100%;
+    }
+
+    .menu-toggle {
+        display: none;
+        flex-direction: column;
+        gap: 6px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 10px;
+    }
+
+    .menu-toggle span {
+        width: 25px;
+        height: 2px;
+        background: var(--text-primary);
+        transition: all 0.3s ease;
+        border-radius: 2px;
+    }
+
+    /* Hero Section */
+    .hero {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        align-items: center;
+        padding: 40px 60px;
+        position: relative;
+        background: transparent;
+    }
+
+    .hero-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 500px;
+        gap: 80px;
+        align-items: center;
+    }
+
+    .hero-text-column {
+        width: 100%;
+    }
+
+    .hero-tag {
+        display: inline-block;
+        padding: 8px 20px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 30px;
+        animation: fadeInUp 0.8s ease forwards;
+        opacity: 0;
+    }
+
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+    }
+
+    .hero-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(60px, 8vw, 120px);
+        font-weight: 700;
+        line-height: 1.1;
+        letter-spacing: -3px;
+        margin-bottom: 30px;
+        animation: fadeInUp 0.8s ease 0.2s forwards;
+        opacity: 0;
+    }
+
+    .hero-title .highlight {
+        position: relative;
+        display: inline-block;
+    }
+
+    .hero-title .highlight::after {
+        content: '';
+        position: absolute;
+        bottom: 10px;
+        left: 0;
+        width: 100%;
+        height: 20px;
+        background: var(--text-primary);
+        opacity: 0.1;
+        z-index: -1;
+        animation: slideIn 1s ease 1s forwards;
+        transform: scaleX(0);
+        transform-origin: left;
+    }
+
+    @keyframes slideIn {
+        to {
+            transform: scaleX(1);
+        }
+    }
+
+    .hero-description {
+        font-size: 20px;
+        font-weight: 400;
+        line-height: 1.8;
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin-bottom: 50px;
+        animation: fadeInUp 0.8s ease 0.4s forwards;
+        opacity: 0;
+    }
+
+    .hero-cta {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        animation: fadeInUp 0.8s ease 0.6s forwards;
+        opacity: 0;
+    }
+
+    /* Hero Logo Column */
+    .hero-logo-column {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .hero-logo-wrapper {
+        position: relative;
+        width: 400px;
+        height: 400px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeInScale 1s ease 0.8s forwards;
+        opacity: 0;
+    }
+
+    @keyframes fadeInScale {
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+    }
+
+    .hero-logo-img {
+        width: 350px;
+        height: 350px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 5px solid var(--accent);
+        box-shadow: 0 20px 60px rgba(255, 255, 255, 0.2);
+        position: relative;
+        z-index: 2;
+        transition: all 0.4s ease;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+        50% {
+            transform: translateY(-20px) rotate(5deg);
+        }
+    }
+
+    .hero-logo-img:hover {
+        transform: scale(1.05) rotate(-5deg);
+        box-shadow: 0 30px 80px rgba(255, 255, 255, 0.3);
+    }
+
+    .hero-logo-glow {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+        opacity: 0.2;
+        animation: pulse-glow 3s ease-in-out infinite;
+        z-index: 1;
+    }
+
+    @keyframes pulse-glow {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 0.2;
+        }
+        50% {
+            transform: scale(1.1);
+            opacity: 0.4;
+        }
+    }
+
+    .btn {
+        padding: 18px 40px;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        text-decoration: none;
+        border: 2px solid var(--accent);
+        background: var(--accent);
+        color: var(--bg-primary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: var(--accent-light);
+        transition: left 0.3s ease;
+        z-index: -1;
+    }
+
+    .btn:hover::before {
+        left: 0;
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: var(--accent);
+    }
+
+    .btn-outline:hover {
+        background: var(--accent);
+        color: var(--bg-primary);
+    }
+
+    /* Marquee Section */
+    .marquee-section {
+        padding: 100px 0;
+        overflow: hidden;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        background: var(--bg-secondary);
+    }
+
+    .marquee {
+        display: flex;
+        gap: 50px;
+        animation: scroll 30s linear infinite;
+        width: fit-content;
+    }
+
+    @keyframes scroll {
+        0% {
+            transform: translateX(0);
+        }
+        100% {
+            transform: translateX(-50%);
+        }
+    }
+
+    .marquee-item {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 80px;
+        font-weight: 700;
+        color: var(--text-primary);
+        opacity: 0.1;
+        white-space: nowrap;
+    }
+
+    /* Value Proposition Section */
+    .value-section {
+        padding: 150px 60px;
+        background: var(--bg-primary);
+    }
+
+    .value-content {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .value-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 60px;
+        margin-top: 80px;
+    }
+
+    .value-item {
+        text-align: left;
+    }
+
+    .value-icon {
+        font-size: 48px;
+        margin-bottom: 20px;
+    }
+
+    .value-item h3 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        letter-spacing: -1px;
+    }
+
+    .value-item p {
+        font-size: 16px;
+        line-height: 1.8;
+        color: var(--text-secondary);
+    }
+
+    /* Services Grid */
+    .services-section {
+        padding: 150px 60px;
+        background: var(--bg-primary);
+    }
+
+    .section-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 48px;
+        font-weight: 700;
+        margin-bottom: 80px;
+        letter-spacing: -1px;
+    }
+
+    .services-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2px;
+        max-width: 1400px;
+        margin: 0 auto;
+        background: var(--border);
+    }
+
+    .service-card {
+        background: var(--card-bg);
+        padding: 60px 40px;
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .service-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 0;
+        background: var(--accent);
+        transition: height 0.4s ease;
+        z-index: 0;
+    }
+
+    .service-card:hover::before {
+        height: 100%;
+    }
+
+    .service-card:hover {
+        color: var(--bg-primary);
+    }
+
+    .service-card:hover .service-number,
+    .service-card:hover .service-title,
+    .service-card:hover .service-desc {
+        color: var(--bg-primary);
+        position: relative;
+        z-index: 1;
+    }
+
+    .service-number {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        opacity: 0.5;
+        margin-bottom: 20px;
+        transition: color 0.4s ease;
+    }
+
+    .service-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        transition: color 0.4s ease;
+        position: relative;
+        z-index: 1;
+    }
+
+    .service-desc {
+        font-size: 15px;
+        line-height: 1.7;
+        color: var(--text-secondary);
+        transition: color 0.4s ease;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Portfolio Section */
+    .portfolio-section {
+        padding: 150px 60px;
+        background: var(--bg-secondary);
+    }
+
+    .portfolio-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 40px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .portfolio-item {
+        aspect-ratio: 16/9;
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+        transition: all 0.4s ease;
+        background: #000;
+    }
+
+    .portfolio-item::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        pointer-events: none;
+    }
+
+    .portfolio-item:hover::after {
+        opacity: 1;
+    }
+
+    .portfolio-item:hover {
+        transform: scale(0.98);
+    }
+
+    .portfolio-item iframe,
+    .portfolio-item video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border: none;
+    }
+
+    .portfolio-vertical-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 30px;
+        max-width: 1400px;
+        margin: 60px auto 0;
+    }
+
+    .portfolio-vertical {
+        aspect-ratio: 9/16;
+    }
+
+    /* Process Section */
+    .process-section {
+        padding: 150px 60px;
+        background: var(--bg-primary);
+    }
+
+    .process-subtitle {
+        text-align: center;
+        font-size: 18px;
+        color: var(--text-secondary);
+        margin-top: 20px;
+        margin-bottom: 100px;
+    }
+
+    .process-timeline {
+        max-width: 900px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .process-timeline::before {
+        content: '';
+        position: absolute;
+        left: 40px;
+        top: 0;
+        height: 100%;
+        width: 2px;
+        background: var(--border);
+    }
+
+    .process-step {
+        display: grid;
+        grid-template-columns: 80px 1fr;
+        gap: 40px;
+        margin-bottom: 80px;
+        position: relative;
+    }
+
+    .process-step:last-child {
+        margin-bottom: 0;
+    }
+
+    .step-number {
+        width: 80px;
+        height: 80px;
+        background: var(--accent);
+        color: var(--bg-primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+        position: relative;
+        z-index: 1;
+        transition: all 0.4s ease;
+    }
+
+    .process-step:hover .step-number {
+        transform: scale(1.1);
+        box-shadow: 0 10px 30px var(--shadow);
+    }
+
+    .step-content {
+        padding-top: 10px;
+    }
+
+    .step-content h3 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        letter-spacing: -1px;
+    }
+
+    .step-content p {
+        font-size: 16px;
+        line-height: 1.8;
+        color: var(--text-secondary);
+    }
+
+    /* Stats Section */
+    .stats-section {
+        padding: 150px 60px;
+        border-top: 1px solid var(--border);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 60px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .stat-item {
+        text-align: left;
+    }
+
+    .stat-number {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 72px;
+        font-weight: 700;
+        letter-spacing: -2px;
+        margin-bottom: 10px;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: var(--text-secondary);
+        letter-spacing: 0.5px;
+    }
+
+    /* Tools Section */
+    .tools-section {
+        padding: 150px 60px;
+        background: rgba(255, 255, 255, 0.08);
+        position: relative;
+    }
+
+    .tools-subtitle {
+        text-align: center;
+        font-size: 18px;
+        color: var(--text-secondary);
+        margin-top: 20px;
+        margin-bottom: 80px;
+    }
+
+    .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 40px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .tool-card {
+        background: rgba(255, 255, 255, 0.12);
+        padding: 40px 30px;
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        text-align: center;
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+
+    .tool-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 0;
+        background: var(--accent);
+        transition: height 0.4s ease;
+        z-index: 0;
+    }
+
+    /* Background fill animation on hover */
+    .tool-card:hover::before {
+        height: 100%;
+    }
+
+    .tool-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px var(--shadow);
+    }
+
+    /* Text color change on hover */
+    .tool-card:hover h3,
+    .tool-card:hover p {
+        color: var(--bg-primary);
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Icon inversion on hover */
+    .tool-icon-wrapper {
+        filter: brightness(0) invert(1);
+    }
+    .tool-card:hover .tool-icon-wrapper {
+        filter: none
+    }
+
+
+    .tool-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        z-index: 1;
+        transition: filter 0.4s ease;
+    }
+
+    .tool-icon-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .tool-card h3 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        position: relative;
+        z-index: 1;
+        transition: color 0.4s ease;
+    }
+
+    .tool-card p {
+        font-size: 14px;
+        line-height: 1.6;
+        color: var(--text-secondary);
+        position: relative;
+        z-index: 1;
+        transition: color 0.4s ease;
+    }
+
+    /* About Section */
+    .about-section {
+        padding: 150px 60px;
+        background: var(--bg-secondary);
+    }
+
+    /* Testimonials Section */
+    .testimonials-section {
+        padding: 150px 60px;
+        background: var(--bg-primary);
+        border-top: 1px solid var(--border);
+    }
+
+    .testimonials-subtitle {
+        text-align: center;
+        font-size: 18px;
+        color: var(--text-secondary);
+        margin-top: 20px;
+        margin-bottom: 80px;
+    }
+
+    .testimonials-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 40px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .testimonial-card {
+        background: var(--card-bg);
+        padding: 50px 40px;
+        border-radius: 15px;
+        border: 1px solid var(--border);
+        transition: all 0.4s ease;
+        position: relative;
+    }
+
+    .testimonial-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 60px var(--shadow);
+        border-color: var(--accent);
+    }
+
+    .testimonial-quote {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 80px;
+        font-weight: 700;
+        color: var(--accent);
+        opacity: 0.1;
+        line-height: 1;
+        margin-bottom: -20px;
+    }
+
+    .testimonial-text {
+        font-size: 16px;
+        line-height: 1.8;
+        color: var(--text-primary);
+        margin-bottom: 30px;
+    }
+
+    .testimonial-author {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .author-name {
+        font-weight: 700;
+        font-size: 16px;
+        margin-bottom: 5px;
+    }
+
+    .author-title {
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+
+    .testimonial-stat {
+        display: inline-block;
+        padding: 10px 20px;
+        background: var(--bg-secondary);
+        border-radius: 50px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--accent);
+        letter-spacing: 0.5px;
+    }
+
+    .about-grid {
+        display: grid;
+        grid-template-columns: 400px 1fr;
+        gap: 100px;
+        max-width: 1400px;
+        margin: 0 auto;
+        align-items: center;
+    }
+
+    .about-image-wrapper {
+        position: relative;
+    }
+
+    .about-image {
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+        border-radius: 10px;
+        filter: grayscale(100%);
+        transition: filter 0.4s ease;
+    }
+
+    .about-image:hover {
+        filter: grayscale(0%);
+    }
+
+    .about-text h2 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 42px;
+        font-weight: 700;
+        margin-bottom: 30px;
+        letter-spacing: -1px;
+    }
+
+    .about-text p {
+        font-size: 16px;
+        line-height: 1.9;
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+    }
+
+    /* Contact Section */
+    .contact-section {
+        padding: 150px 60px;
+        background: var(--bg-primary);
+    }
+
+    /* FAQ Section */
+    .faq-section {
+        padding: 150px 60px;
+        background: var(--bg-secondary);
+    }
+
+    .faq-container {
+        max-width: 900px;
+        margin: 80px auto 0;
+    }
+
+    .faq-item {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .faq-item:hover {
+        border-color: var(--accent);
+    }
+
+    .faq-question {
+        padding: 30px 40px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        user-select: none;
+    }
+
+    .faq-question h3 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0;
+        padding-right: 20px;
+    }
+
+    .faq-icon {
+        font-size: 32px;
+        font-weight: 300;
+        transition: transform 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .faq-item.active .faq-icon {
+        transform: rotate(45deg);
+    }
+
+    .faq-answer {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+
+    .faq-item.active .faq-answer {
+        max-height: 500px;
+        padding: 0 40px 30px;
+    }
+
+    .faq-answer p {
+        font-size: 16px;
+        line-height: 1.8;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .contact-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 100px;
+        max-width: 1400px;
+        margin: 80px auto 0;
+    }
+
+    .contact-info {
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .contact-item {
+        border-top: 1px solid var(--border);
+        padding-top: 30px;
+    }
+
+    .contact-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-secondary);
+        margin-bottom: 10px;
+    }
+
+    .contact-value {
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    .contact-value a {
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .contact-value a:hover {
+        opacity: 0.6;
+    }
+
+    .calendly-wrapper {
+        background: var(--card-bg);
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+    }
+
+    .calendly-wrapper iframe {
+        width: 100%;
+        height: 600px;
+        border: none;
+    }
+
+    /* Footer */
+    footer {
+        padding: 80px 60px 40px;
+        border-top: 1px solid var(--border);
+        background: var(--bg-secondary);
+    }
+
+    .footer-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .footer-logo {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .footer-logo-img {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .footer-links {
+        display: flex;
+        gap: 40px;
+    }
+
+    .footer-links a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 14px;
+        transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+        color: var(--text-primary);
+    }
+
+    .footer-bottom {
+        max-width: 1400px;
+        margin: 60px auto 0;
+        padding-top: 40px;
+        border-top: 1px solid var(--border);
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 14px;
+    }
+
+    /* Scroll Progress */
+    .scroll-progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 3px;
+        background: var(--accent);
+        z-index: 9999;
+        transition: width 0.1s ease;
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+        .hero-content {
+            grid-template-columns: 1fr;
+            gap: 60px;
+        }
+
+        .hero-logo-column {
+            order: -1; /* Move logo above text on tablets */
+        }
+
+        .hero-logo-wrapper {
+            width: 300px;
+            height: 300px;
+        }
+
+        .hero-logo-img {
+            width: 250px;
+            height: 250px;
+        }
+
+        .services-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .portfolio-vertical-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .about-grid {
+            grid-template-columns: 1fr;
+            gap: 60px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        nav {
+            padding: 20px 30px;
+        }
+
+        nav.scrolled {
+            padding: 15px 30px;
+        }
+
+        .nav-links {
+            display: none;
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 100%;
+            background: var(--bg-primary);
+            flex-direction: column;
+            gap: 0;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-links.active {
+            display: flex;
+        }
+
+        .nav-links a {
+            padding: 15px;
+            width: 100%;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .menu-toggle {
+            display: flex;
+        }
+
+        .menu-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
+        }
+
+        .menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -8px);
+        }
+
+        .hero {
+            padding: 40px 30px;
+        }
+
+        .hero-content {
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+
+        .hero-logo-column {
+            order: -1; /* Logo appears first on mobile */
+        }
+
+        .hero-logo-wrapper {
+            width: 250px;
+            height: 250px;
+            margin: 0 auto;
+        }
+
+        .hero-logo-img {
+            width: 200px;
+            height: 200px;
+            border-width: 3px;
+        }
+
+        .hero-title {
+            font-size: 48px;
+        }
+
+        .services-section,
+        .portfolio-section,
+        .stats-section,
+        .about-section,
+        .contact-section,
+        .value-section,
+        .tools-section,
+        .process-section,
+        .testimonials-section,
+        .faq-section {
+            padding: 80px 30px;
+        }
+
+        .value-grid {
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+
+        .tools-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .process-timeline::before {
+            left: 30px;
+        }
+
+        .process-step {
+            grid-template-columns: 60px 1fr;
+            gap: 30px;
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            font-size: 20px;
+        }
+
+        .step-content h3 {
+            font-size: 22px;
+        }
+
+        .testimonials-grid {
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        .faq-question {
+            padding: 25px 30px;
+        }
+
+        .faq-question h3 {
+            font-size: 18px;
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 0 30px 25px;
+        }
+
+        .services-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .portfolio-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .portfolio-vertical-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+
+        .contact-grid {
+            grid-template-columns: 1fr;
+            gap: 60px;
+        }
+
+        .footer-content {
+            flex-direction: column;
+            gap: 40px;
+            text-align: center;
+        }
+
+        .footer-logo {
+            justify-content: center;
+        }
+
+        .marquee-item {
+            font-size: 40px;
+        }
+
+        .cursor, .cursor-dot {
+            display: none;
+        }
+    }
+
+    /* Loading Animation */
+    .page-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--bg-primary);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.5s ease;
+    }
+
+    .page-loader.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .loader-text {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+        animation: pulse 1.5s ease infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+    }
+</style>
+</head>
+<body>
+    <!-- Page Loader -->
+    <div class="page-loader" id="pageLoader">
+        <div class="loader-text">VisionCut Studio</div>
+    </div>
+
+    <!-- Scroll Progress -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Custom Cursor -->
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-dot" id="cursorDot"></div>
+
+    <!-- Canvas Background -->
+    <canvas id="canvas-background"></canvas>
+
+    <div class="content-wrapper">
+        <!-- Navigation -->
+        <nav id="nav">
+            <div class="nav-logo">
+                <img src="/Assets/images/title logo.png" alt="VisionCut Studio Logo" class="nav-logo-img" />
+                <span>VisionCut Studio</span>
+            </div>
+            <button class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="nav-links" id="navLinks">
+                <a href="#portfolio">Portfolio</a>
+                <a href="#services">Services</a>
+                <a href="#about">About</a>
+                <a href="#contact">Contact</a>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <div class="hero-text-column">
+                    <div class="hero-tag">Results-Driven Video Editing</div>
+                    <h1 class="hero-title">
+                        Turn views into <span class="highlight">customers.</span><br>
+                        Build brands that <span class="highlight">grow.</span>
+                    </h1>
+                    <p class="hero-description">
+                        We don't just edit videos we engineer content that drives organic reach, boosts engagement, 
+                        and converts viewers into loyal customers. Data-driven storytelling that grows your business.
+                    </p>
+                    <div class="hero-cta">
+                        <a href="#contact" class="btn">Get Your Growth Strategy</a>
+                        <a href="#portfolio" class="btn btn-outline">See Results</a>
+                    </div>
+                </div>
+                <div class="hero-logo-column">
+                    <div class="hero-logo-wrapper">
+                        <img src="logo.jpg" alt="VisionCut Studio" class="hero-logo-img" />
+                        <div class="hero-logo-glow"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Marquee Section -->
+        <div class="marquee-section">
+            <div class="marquee">
+                <span class="marquee-item">ENGAGEMENT</span>
+                <span class="marquee-item">•</span>
+                <span class="marquee-item">CONVERSIONS</span>
+                <span class="marquee-item">•</span>
+                <span class="marquee-item">ORGANIC REACH</span>
+                <span class="marquee-item">•</span>
+                <span class="marquee-item">GROWTH</span>
+                <span class="marquee-item">•</span>
+                <span class="marquee-item">ENGAGEMENT</span>
+                <span class="marquee-item">•</span>
+                <span class="marquee-item">CONVERSIONS</span>
+                <span class="marquee-item">•</span>
+                <span class="marquee-item">ORGANIC REACH</span>
+                <span class="marquee-item">•</span>
+                <span class="marquee-item">GROWTH</span>
+                <span class="marquee-item">•</span>
+            </div>
+        </div>
+
+        <!-- Value Proposition Section -->
+        <section class="value-section">
+            <div class="value-content">
+                <h2 class="section-title">Why Choose VisionCut?</h2>
+                <div class="value-grid">
+                    <div class="value-item">
+                        <div class="value-icon">📈</div>
+                        <h3>Algorithm-First Editing</h3>
+                        <p>We understand platform algorithms. Every edit is optimized for watch time, retention, and shares key metrics that drive organic reach on Instagram, TikTok, and YouTube.</p>
+                    </div>
+                    <div class="value-item">
+                        <div class="value-icon">🎯</div>
+                        <h3>Conversion-Focused</h3>
+                        <p>Beautiful visuals mean nothing without results. We strategically place CTAs, highlight benefits over features, and design videos that move viewers down your sales funnel.</p>
+                    </div>
+                    <div class="value-item">
+                        <div class="value-icon">⚡</div>
+                        <h3>Fast Turnaround</h3>
+                        <p>Speed matters in content marketing. Our streamlined process delivers professional edits in 24-48 hours, so you can maintain consistent posting schedules that algorithms reward.</p>
+                    </div>
+                    <div class="value-item">
+                        <div class="value-icon">💰</div>
+                        <h3>Maximum ROI</h3>
+                        <p>One video shoot becomes 20+ assets. We repurpose content across platforms, create vertical/horizontal versions, and extract clips maximizing your investment's return.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section class="services-section" id="services">
+            <h2 class="section-title">How We Grow Your Business</h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-number">01</div>
+                    <h3 class="service-title">Viral-Ready Social Content</h3>
+                    <p class="service-desc">Instagram, TikTok & YouTube videos engineered for maximum algorithmic reach. Hook viewers in 3 seconds, boost watch time, drive organic discovery.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-number">02</div>
+                    <h3 class="service-title">Conversion-Focused Ads</h3>
+                    <p class="service-desc">Sales-driven video ads with proven frameworks. Clear CTAs, benefit-first messaging, and strategic editing that turns viewers into buyers.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-number">03</div>
+                    <h3 class="service-title">Brand Authority Videos</h3>
+                    <p class="service-desc">Position your brand as an industry leader. Professional testimonials, case studies, and thought leadership content that builds trust at scale.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-number">04</div>
+                    <h3 class="service-title">SEO-Optimized Long-Form</h3>
+                    <p class="service-desc">YouTube videos designed for discoverability. Retention-optimized editing with strategic chapter markers and engagement loops that rank.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-number">05</div>
+                    <h3 class="service-title">Product Demo Videos</h3>
+                    <p class="service-desc">Showcase features that sell. Clear demonstrations with benefit-focused narratives that reduce purchase hesitation and increase conversions.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-number">06</div>
+                    <h3 class="service-title">Repurposing & Scaling</h3>
+                    <p class="service-desc">One video becomes 20+ assets. Strategic content repurposing for all platforms maximize ROI from every piece of footage you have.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Portfolio Section -->
+        <section class="portfolio-section" id="portfolio">
+            <h2 class="section-title">Work That Performs</h2>
+            <div class="portfolio-grid">
+                <div class="portfolio-item">
+                    <iframe src="https://www.youtube.com/embed/YC7zYlwj_aE?si=RSX8Vb2vbv6nG3ru" allowfullscreen></iframe>
+                </div>
+                <div class="portfolio-item">
+                    <iframe src="https://www.youtube.com/embed/OyWGNYtUvHQ?si=hBYLMnoWjvyfZEBB" allowfullscreen></iframe>
+                </div>
+                <div class="portfolio-item">
+                    <iframe src="https://www.youtube.com/embed/9krKMdrzllk?si=4vpFm09cxVz-EhHn" allowfullscreen></iframe>
+                </div>
+                <div class="portfolio-item">
+                    <iframe src="https://www.youtube.com/embed/YWQdCZeiyxA?si=O2jNYXB-GoF2fxfj" allowfullscreen></iframe>
+                </div>
+            </div>
+            <div class="portfolio-vertical-grid">
+                <div class="portfolio-item portfolio-vertical">
+                    <video controls><source src="Assets/Videos/vid 1.mp4" type="video/mp4"></video>
+                </div>
+                <div class="portfolio-item portfolio-vertical">
+                    <video controls><source src="Assets/Videos/vid 2.mp4" type="video/mp4"></video>
+                </div>
+                <div class="portfolio-item portfolio-vertical">
+                    <video controls><source src="Assets/Videos/vid 3.mp4" type="video/mp4"></video>
+                </div>
+                <div class="portfolio-item portfolio-vertical">
+                    <video controls><source src="Assets/Videos/vid 4.mp4" type="video/mp4"></video>
+                </div>
+            </div>
+            
+            <!-- Complete Portfolio Button -->
+            <div style="text-align: center; margin-top: 60px;">
+                <a href="https://drive.google.com/drive/folders/1pvAYsqoDe1Dfl_pNHPiSbHPeiTIaHRyn?usp=sharing" 
+                   target="_blank" class="btn btn-outline" style="display: inline-flex; align-items: center; gap: 12px;">
+                    <img src="Assets/images/google-drive.png" alt="Google Drive" style="width: 40px; height: 40px;">
+                    Look Through Complete Portfolio
+                </a>
+            </div>            
+        </section>
+
+        <!-- Stats Section -->
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number" data-target="500">0</div>
+                    <div class="stat-label">Videos Delivered</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" data-target="12">0</div>
+                    <div class="stat-label">Million Organic Views</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" data-target="3">0</div>
+                    <div class="stat-label">x Average Engagement Boost</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" data-target="24">0</div>
+                    <div class="stat-label">Hour Avg Turnaround</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tools Section -->
+        <section class="tools-section">
+            <h2 class="section-title">Our Professional Arsenal</h2>
+            <p class="tools-subtitle">Powered by the best software in the industry to deliver exceptional results</p>
+            <div class="tools-grid">
+                <div class="tool-card">
+                    <div class="tool-icon-wrapper">
+                        <img src="Assets/images/premier pro.png" alt="Premiere Pro">
+                    </div>
+                    <h3>Adobe Premiere Pro</h3>
+                    <p>Industry-standard editing for precision timeline work and seamless workflow</p>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon-wrapper">
+                        <img src="Assets/images/After effects.png" alt="After Effects">
+                    </div>
+                    <h3>After Effects</h3>
+                    <p>Advanced motion graphics, visual effects, and dynamic animations</p>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon-wrapper">
+                        <img src="Assets/images/davinci resolve.png" alt="DaVinci Resolve">
+                    </div>
+                    <h3>DaVinci Resolve</h3>
+                    <p>Hollywood-grade color grading and audio post production</p>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon-wrapper">
+                        <img src="Assets/images/photoshop.png" alt="Photoshop">
+                    </div>
+                    <h3>Adobe Photoshop</h3>
+                    <p>Custom thumbnails and graphic assets designed for maximum CTR</p>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon-wrapper">
+                        <img src="Assets/images/Capcut.png" alt="CapCut">
+                    </div>
+                    <h3>CapCut Pro</h3>
+                    <p>Rapid social media editing optimized for viral content</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Process Section -->
+        <section class="process-section">
+            <h2 class="section-title">Our Growth-Driven Process</h2>
+            <p class="process-subtitle">From strategy to delivery, every step is optimized for maximum impact</p>
+            <div class="process-timeline">
+                <div class="process-step">
+                    <div class="step-number">01</div>
+                    <div class="step-content">
+                        <h3>Discovery & Strategy</h3>
+                        <p>We start by understanding your business goals, target audience, and KPIs. What platforms are you focusing on? What action should viewers take? We reverse-engineer the editing strategy from your desired outcome.</p>
+                    </div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">02</div>
+                    <div class="step-content">
+                        <h3>Content Analysis</h3>
+                        <p>We analyze your raw footage and identify the strongest hooks, key messages, and conversion moments. Every frame is evaluated for its potential to drive engagement and viewer retention.</p>
+                    </div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">03</div>
+                    <div class="step-content">
+                        <h3>Algorithm-Optimized Editing</h3>
+                        <p>We craft your video with platform algorithms in mind—strategic pacing for watch time, pattern interrupts for retention, and thumb-stopping hooks. CTAs are placed at peak engagement moments.</p>
+                    </div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">04</div>
+                    <div class="step-content">
+                        <h3>Multi-Format Delivery</h3>
+                        <p>One edit becomes multiple assets. We deliver horizontal (16:9), vertical (9:16), and square (1:1) versions optimized for YouTube, Instagram, TikTok, LinkedIn, and Facebook—maximizing your content ROI.</p>
+                    </div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">05</div>
+                    <div class="step-content">
+                        <h3>Performance Tracking</h3>
+                        <p>We provide guidance on posting strategies and help you track what's working. Based on performance data, we refine our approach for your next videos to continuously improve results.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section class="testimonials-section">
+            <h2 class="section-title">Client Success Stories</h2>
+            <p class="testimonials-subtitle">Real results from businesses we've helped grow</p>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-quote">"</div>
+                    <p class="testimonial-text">VisionCut transformed our social media presence. Our engagement rates tripled and we're consistently hitting 100K+ views per video. The ROI has been incredible.</p>
+                    <div class="testimonial-author">
+                        <div class="author-info">
+                            <div class="author-name">Sarah Mitchell</div>
+                            <div class="author-title">Marketing Director, TechFlow</div>
+                        </div>
+                    </div>
+                    <div class="testimonial-stat">+287% Engagement Growth</div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-quote">"</div>
+                    <p class="testimonial-text">Their algorithm-focused approach is genius. We went from 5K to 50K followers in 3 months. Every video is optimized for maximum reach and conversions.</p>
+                    <div class="testimonial-author">
+                        <div class="author-info">
+                            <div class="author-name">James Chen</div>
+                            <div class="author-title">Founder, FitLife Studios</div>
+                        </div>
+                    </div>
+                    <div class="testimonial-stat">10x Follower Growth</div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-quote">"</div>
+                    <p class="testimonial-text">Fast turnaround, professional quality, and results-driven editing. Our product launch video generated $50K in sales in the first week. Worth every penny.</p>
+                    <div class="testimonial-author">
+                        <div class="author-info">
+                            <div class="author-name">Lisa Rodriguez</div>
+                            <div class="author-title">E-commerce Owner, StyleHub</div>
+                        </div>
+                    </div>
+                    <div class="testimonial-stat">$50K+ in Launch Sales</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="about-section" id="about">
+            <div class="about-grid">
+                <div class="about-image-wrapper">
+                    <img src="Assets/images/self image.jpg" alt="Kushal Kumar" class="about-image">
+                </div>
+                <div class="about-text">
+                    <h2>Your Growth Partner</h2>
+                    <p>
+                        I'm Kushal Kumar G, a cinematic video editor and motion designer based in Bangalore. 
+                        I specialize in transforming raw footage into powerful, scroll-stopping stories that 
+                        blend emotion, rhythm, and design. My work focuses on creating bold visuals, clean cuts, 
+                        and engaging narratives that help brands, creators, and businesses stand out.
+                    </p>
+                    <p>
+                        With hands-on experience across multiple niches—including lifestyle, fashion, tech, 
+                        educational, and personal brands—I tailor every edit to match the brand’s voice and 
+                        platform. From cinematic storytelling and advanced color grading to motion graphics, 
+                        2D animation, and immersive sound design, I craft edits that not only look good but 
+                        feel right. I specialize in high-retention reels and short-form content optimized for 
+                        digital platforms.
+                    </p>
+                    <p>
+                        Proficient in tools like Adobe Premiere Pro, After Effects, Photoshop, Lightroom, 
+                        CapCut, FL Studio, and Blender, I combine creative direction with strong post-production 
+                        expertise. Whether working with personal clients, freelancing, or building my own 
+                        creative presence, I focus on delivering high-impact visuals that align with brand 
+                        aesthetics and audience expectations. I continuously refine my skills to stay ahead 
+                        of trends and elevate every project I take on.
+                    </p>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section class="faq-section">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>How do you optimize videos for organic growth?</h3>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>We use a data-driven approach: strategic hooks in the first 3 seconds to stop scrolling, retention-focused pacing to maximize watch time, pattern interrupts every 7-10 seconds to maintain attention, and platform-specific formatting (vertical for TikTok/Reels, horizontal for YouTube). We also optimize CTAs based on platform algorithms and viewer behavior patterns.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>What's your typical turnaround time?</h3>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Standard turnaround is 24-48 hours for most projects. Rush delivery (12-24 hours) is available for urgent needs. Longer projects like wedding films or documentaries typically take 5-7 days. We understand that consistent posting is crucial for algorithm performance, so we prioritize fast delivery without compromising quality.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Do you provide multiple format versions?</h3>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Absolutely! Every project includes horizontal (16:9 for YouTube), vertical (9:16 for TikTok/Reels/Shorts), and square (1:1 for Instagram feed) versions. We also create platform-specific edits with optimized CTAs, captions, and thumbnail frames. This maximizes your content ROI across all platforms.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Can you help with video strategy and planning?</h3>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes! We offer strategic consultation to help you plan content that aligns with your business goals. This includes hook scripting, content repurposing strategies, posting schedules, and performance analysis. We'll help you understand what's working and how to double down on winning formats.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>What if I need revisions?</h3>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>All projects include 2 rounds of revisions. We want you to be completely satisfied with the final product. Most clients are happy with the first version, but we're committed to refining until it's perfect. Additional revisions beyond the included rounds are available at a minimal fee.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>How much does video editing cost?</h3>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Pricing varies based on project complexity, length, and deliverables. Social media clips start at $150, product videos from $300, and comprehensive packages (multiple formats + repurposing) from $500. Contact us for a custom quote based on your specific needs. We offer volume discounts for ongoing monthly projects.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="contact-section" id="contact">
+            <h2 class="section-title">Ready to Scale Your Reach?</h2>
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-label">Email</div>
+                        <div class="contact-value">
+                            <a href="mailto:visioncutstudio@gmail.com" target="_blank">visioncutstudio@gmail.com</a>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-label">Phone</div>
+                        <div class="contact-value">
+                            <a href="tel:+918951575184">+91 89515 75184</a>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-label">Quick Inquiry</div>
+                        <div class="contact-value">
+                            <a href="https://docs.google.com/forms/d/1Bc9jqTrYc3oDTzGuZFzpZ7GDuQHuC_OKG0LmZVnulF8/edit" 
+                               target="_blank">Contact Form →</a>
+                        </div>
+                        
+                    </div>
+                </div>
+                <div class="calendly-wrapper">
+                    <iframe src="https://calendly.com/visioncutstudio1/30min" title="Schedule a meeting"></iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="logo.jpg" alt="VisionCut Studio Logo" class="footer-logo-img" />
+                    <span>VisionCut Studio</span>
+                </div>
+                <div class="footer-links">
+                    <a href="https://www.instagram.com/visioncutstudio/" target="_blank">Instagram</a>
+                    <a href="https://www.facebook.com/VisionCutStudio" target="_blank">Facebook</a>
+                    <a href="https://www.linkedin.com/company/visioncutstudio" target="_blank">LinkedIn</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 VisionCut Studio. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        // Page Loader
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('pageLoader').classList.add('hidden');
+            }, 1000);
+        });
+
+        // Menu Toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+
+        menuToggle.addEventListener('click', () => {
+            menuToggle.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+
+        // Close menu on link click
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                menuToggle.classList.remove('active');
+                navLinks.classList.remove('active');
+            });
+        });
+
+        // Navbar scroll effect
+        const nav = document.getElementById('nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // Scroll Progress
+        const scrollProgress = document.getElementById('scrollProgress');
+        window.addEventListener('scroll', () => {
+            const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (window.scrollY / windowHeight) * 100;
+            scrollProgress.style.width = scrolled + '%';
+        });
+
+        // Custom Cursor
+        const cursor = document.getElementById('cursor');
+        const cursorDot = document.getElementById('cursorDot');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            cursorDot.style.left = e.clientX + 'px';
+            cursorDot.style.top = e.clientY + 'px';
+        });
+
+        // Cursor hover effect
+        const hoverElements = document.querySelectorAll('a, button, .portfolio-item, .service-card');
+        hoverElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursor.style.transform = 'translate(-50%, -50%) scale(1.5)';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+            });
+        });
+
+        // Animated Canvas Background
+        const canvas = document.getElementById('canvas-background');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        const particles = [];
+        const particleCount = 100;
+        let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 3; // Increased size
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+                this.opacity = Math.random() * 0.3 + 0.5; // Increased opacity
+            }
+
+            update() {
+                // Move towards mouse
+                const dx = mouse.x - this.x;
+                const dy = mouse.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 200) {
+                    const force = (200 - distance) / 200;
+                    this.x -= (dx / distance) * force * 2;
+                    this.y -= (dy / distance) * force * 2;
+                }
+
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Initialize particles
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        // Mouse move listener for canvas
+        document.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        // Animation loop
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw connections
+            particles.forEach((particle, i) => {
+                particle.update();
+                particle.draw();
+
+                particles.slice(i + 1).forEach(otherParticle => {
+                    const dx = particle.x - otherParticle.x;
+                    const dy = particle.y - otherParticle.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 150) {
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${0.3 * (1 - distance / 150)})`; // Increased from 0.2 to 0.3
+                        ctx.lineWidth = 2; // Increased from 1.5 to 2
+                        ctx.beginPath();
+                        ctx.moveTo(particle.x, particle.y);
+                        ctx.lineTo(otherParticle.x, otherParticle.y);
+                        ctx.stroke();
+                    }
+                });
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // Stats Counter Animation
+        const statNumbers = document.querySelectorAll('.stat-number');
+        let hasAnimated = false;
+
+        const animateStats = () => {
+            if (hasAnimated) return;
+
+            const statsSection = document.querySelector('.stats-section');
+            const rect = statsSection.getBoundingClientRect();
+            
+            if (rect.top < window.innerHeight && rect.bottom >= 0) {
+                hasAnimated = true;
+                
+                statNumbers.forEach((stat, index) => {
+                    const target = parseInt(stat.getAttribute('data-target'));
+                    const labels = ['Videos Delivered', 'Million Organic Views', 'x Average Engagement Boost', 'Hour Avg Turnaround'];
+                    const duration = 2000;
+                    const increment = target / (duration / 16);
+                    let current = 0;
+
+                    const updateCounter = () => {
+                        current += increment;
+                        if (current < target) {
+                            stat.textContent = Math.floor(current);
+                            requestAnimationFrame(updateCounter);
+                        } else {
+                            stat.textContent = target;
+                            // Add 'x' suffix for the engagement boost stat
+                            if (labels[index].includes('Engagement')) {
+                                stat.textContent = target + 'x';
+                            }
+                        }
+                    };
+
+                    updateCounter();
+                });
+            }
+        };
+
+        window.addEventListener('scroll', animateStats);
+
+        // FAQ Accordion
+        const faqItems = document.querySelectorAll('.faq-item');
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+            question.addEventListener('click', () => {
+                const isActive = item.classList.contains('active');
+                
+                // Close all other items
+                faqItems.forEach(otherItem => {
+                    otherItem.classList.remove('active');
+                });
+                
+                // Toggle current item
+                if (!isActive) {
+                    item.classList.add('active');
+                }
+            });
+        });
+
+        // Smooth Scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
